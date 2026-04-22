@@ -93,7 +93,10 @@ for i, n in enumerate(seq_notes):
     seq_params[4 + i] = v(n)          # row 1 CV = pitch (V)
     seq_params[12 + i] = 0.0          # row 2 CV (unused)
     seq_params[20 + i] = 0.0          # row 3 CV (unused)
-    seq_params[28 + i] = 1.0          # gate button -> step active
+    # NOTE: gate buttons MUST be 0.0 on load. They're BooleanTriggers — a non-
+    # zero saved value causes a 0->1 transition on the first process() call,
+    # which *toggles* that step's gate off (wiping out our data.gates=[1]*8).
+    seq_params[28 + i] = 0.0
 
 seq3 = mod("Fundamental", "SEQ3", (0, 0), seq_params,
            data={"running": True, "gates": [1]*8, "clockPassthrough": False})
@@ -179,6 +182,11 @@ lfo = mod("Fundamental", "LFO", (81, 0), {
     3: 0.0, 5: 0.5, 6: 0.0,
 })
 
+# --- Audio-2 output (Core plugin, ships with Rack) -------------------------
+# 2-in/2-out stereo audio interface. Params: 0 LEVEL (0..2, default 1.0)
+# Inputs: 0 = L, 1 = R (R is normalled to L so mono into L is fine).
+audio = mod("Core", "AudioInterface2", (91, 0), {0: 1.0})
+
 # ---------------------------------------------------------------------------
 # Bonus free modules from Bastl / Erica Synths (placed, unconnected)
 # ---------------------------------------------------------------------------
@@ -187,7 +195,7 @@ bwt_vco     = mod("EricaCopies", "BlackWaveTableVCO", (8, 1), {})
 octasource  = mod("EricaCopies", "BlackOctasource",   (20, 1), {})
 fusion_dly  = mod("EricaCopies", "FusionDelay",       (34, 1), {})
 
-modules = [seq3, vco, vcf, adsr, vca, mixer, delay, noise, lfo,
+modules = [seq3, vco, vcf, adsr, vca, mixer, delay, noise, lfo, audio,
            pizza, bwt_vco, octasource, fusion_dly]
 
 # ---------------------------------------------------------------------------
@@ -219,6 +227,10 @@ cables = [
     cable(lfo["id"],  0,  mixer["id"], 6, GREEN),
     # mix bus -> delay: Mixer MIX(out 0) -> Delay IN(in 4)
     cable(mixer["id"],0,  delay["id"], 4, RED),
+    # delay -> audio out L: Delay MIX(out 0) -> Audio2 L(in 0)
+    cable(delay["id"],0,  audio["id"], 0, RED),
+    # delay -> audio out R: Delay MIX(out 0) -> Audio2 R(in 1)   (stereo duplicate)
+    cable(delay["id"],0,  audio["id"], 1, RED),
 ]
 
 # ---------------------------------------------------------------------------
