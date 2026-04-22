@@ -117,10 +117,10 @@ vco = mod("Fundamental", "VCO", (22, 0), {
 # Params: 0 FREQ 1 FINE(removed) 2 RES 3 FREQ_CV 4 DRIVE 5 RES_CV 6 DRIVE_CV
 # In: 0 FREQ 1 RES 2 DRIVE 3 IN | Out: 0 LPF 1 HPF
 vcf = mod("Fundamental", "VCF", (32, 0), {
-    0: 0.55,   # cutoff ~ 700 Hz (dark, resonant)
-    2: 0.70,   # resonance high — gives the singing "rrrrrr" quality
-    3: 0.45,   # env-to-cutoff amount
-    4: 0.15,   # a little drive
+    0: 0.35,   # base cutoff low; envelope sweeps it open on each note
+    2: 0.55,   # resonance — enough to sing but not self-oscillate
+    3: 0.65,   # env-to-cutoff amount (the VCS3-ish plucky sweep)
+    4: 0.10,   # a touch of drive for body
     5: 0.0,    # res CV atten
     6: 0.0,    # drive CV atten
 })
@@ -129,12 +129,12 @@ vcf = mod("Fundamental", "VCF", (32, 0), {
 # Params: 0 A 1 D 2 S 3 R  4..7 CV attens  8 PUSH
 # In: 0 A 1 D 2 S 3 R 4 GATE 5 RETRIG | Out: 0 ENV
 adsr = mod("Fundamental", "ADSR", (40, 0), {
-    0: 0.05,   # very fast attack
-    1: 0.40,   # medium-short decay
-    2: 0.00,   # no sustain (percussive pluck)
-    3: 0.30,   # short release
+    0: 0.02,   # snappy attack
+    1: 0.35,   # short decay — tight pluck
+    2: 0.00,   # no sustain (percussive)
+    3: 0.20,   # short release
     4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0,
-    8: 0.0,    # push button
+    8: 0.0,    # push button (BooleanTrigger — keep 0)
 })
 
 # --- VCA (legacy, 8hp) -----------------------------------------------------
@@ -146,9 +146,9 @@ vca = mod("Fundamental", "VCA", (50, 0), {0: 1.0, 1: 1.0})
 # Params: 0 MIX_LVL  1..4 CH LVLs
 # In: 0 MIX_CV  1..4 CH_IN  5..8 CV_IN | Out: 0 MIX  1..4 CH_OUT
 mixer = mod("Fundamental", "VCMixer", (58, 0), {
-    0: 1.0,    # master
-    1: 1.0,    # ch1 dry sequence
-    2: 0.8,    # ch2 noise (whooshes)
+    0: 0.85,   # master (a hair below unity to avoid clipping into delay)
+    1: 1.0,    # ch1 dry sequence = lead voice
+    2: 0.30,   # ch2 noise — subtle wind-bed, not overpowering
     3: 0.0,    # ch3 unused
     4: 0.0,    # ch4 unused
 })
@@ -158,13 +158,13 @@ mixer = mod("Fundamental", "VCMixer", (58, 0), {
 # In: 0 TIME 1 FB 2 TONE 3 MIX 4 IN 5 CLK | Out: 0 MIX 1 WET
 # TIME_PARAM formula: time_s = 0.001 * 10000^param  -> param = log10(time_ms)/4
 import math
-_delay_time_s = 0.38
+_delay_time_s = 0.375   # ~dotted 16th at 160 bpm — locks with the sequence
 _delay_param = math.log10(_delay_time_s * 1000) / 4.0
 delay = mod("Fundamental", "Delay", (68, 0), {
-    0: _delay_param,  # ~380 ms  (tape-echo quarter-note-ish feel)
-    1: 0.55,          # feedback
-    2: 0.45,          # tone (slightly darker)
-    3: 0.40,          # wet/dry mix
+    0: _delay_param,  # ~375 ms
+    1: 0.45,          # feedback — musical repeats, no runaway
+    2: 0.50,          # tone (neutral)
+    3: 0.35,          # wet/dry mix
     4: 0.0, 5: 0.0, 6: 0.0, 7: 0.0,   # CV attenuators
 })
 
@@ -178,7 +178,7 @@ noise = mod("Fundamental", "Noise", (78, 0), {})
 lfo = mod("Fundamental", "LFO", (81, 0), {
     0: 1.0,            # unipolar (0..10V) — good for mod amplitude
     1: 0.0,            # not inverted
-    2: math.log2(0.25),# ~0.25 Hz slow whoosh (param is log2 Hz)
+    2: math.log2(0.15),# ~0.15 Hz slow whoosh (param is log2 Hz)
     3: 0.0, 5: 0.5, 6: 0.0,
 })
 
