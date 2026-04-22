@@ -23,10 +23,10 @@ A `.vcv` file is just a tar + zstd bundle. Inside is a human-readable
 
 ## Signal flow
 
-Row 0 (fully cabled, uses only VCV Fundamental — ships with Rack):
+Row 0 (fully cabled, uses only VCV Fundamental + Rack's built-in Core):
 
 ```
- SEQ3 ──CV1──▶ VCO ──SAW──▶ VCF ──▶ VCA ──▶ Mixer.CH1 ──▶ Delay ──▶ audio out
+ SEQ3 ──CV1──▶ VCO ──SAW──▶ VCF ──▶ VCA ──▶ Mixer.CH1 ──▶ Delay ──▶ Audio-2 L/R
    └─TRIG──▶ ADSR ──▶ VCF.FREQ  &  VCA.LIN
  Noise.WHITE ──▶ Mixer.CH2
  LFO.SIN ─────▶ Mixer.CH2 CV     (slow whoosh amplitude modulation)
@@ -64,9 +64,15 @@ Row 1 (placed but unconnected — wire these up yourself to experiment):
 ## Usage
 
 1. Double-click `Pink Floyd.vcv`, or open it from Rack via **File → Open**.
-2. Rack will prompt to install any missing plugins from the Library.
-3. Add an **Audio** module and patch `Delay.MIX` → `Audio.L/R`.
-4. Hit play (or use Fundamental's built-in clock from SEQ3).
+2. Rack will prompt to install any missing plugins from the Library — accept.
+3. On the **Audio-2** module (far right of the rack) click the display and
+   pick your audio driver + output device (e.g. *Core Audio → MacBook Pro
+   Speakers*). This setting is machine-specific so the patch can't ship it.
+4. That's it — sound should start immediately. The sequencer auto-runs on
+   load.
+
+> If it's silent, check that **SEQ3's RUN light is lit** (click RUN if not)
+> and that Rack's CPU meter is green.
 
 ### Tweak knobs for different moods
 
